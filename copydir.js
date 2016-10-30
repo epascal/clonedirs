@@ -52,6 +52,10 @@ class Main {
                     let destObject = this.bigFilesMap.get(fileName);
                     if (destObject && destObject.size === stat.size) {
                         console.log('move file', file);
+                        try {
+                            fs.unlinkSync(dstFile);
+                        }
+                        catch (e) { }
                         fs.renameSync(destObject.file, dstFile);
                     }
                     else {
@@ -120,7 +124,7 @@ class Main {
             }
             else {
                 let fileName = file.substr(file.lastIndexOf('/') + 1);
-                if (stat.size > 100000000 && fileName.length > 10) {
+                if (stat.size > 10000000 && fileName.length > 10) {
                     this.bigFilesMap.set(fileName, { 'file': file, 'size': stat.size });
                 }
             }
