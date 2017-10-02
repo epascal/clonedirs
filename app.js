@@ -1,5 +1,6 @@
 "use strict";
-const fs = require('fs');
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = require("fs");
 var scope;
 const TIME_ACTIVITY = 1;
 class Main {
@@ -10,8 +11,8 @@ class Main {
         scope.srcFolder = process.argv[2];
         scope.dstFolder = process.argv[3];
         scope.walkScanDest(scope.dstFolder);
-        scope.walkCopy(scope.srcFolder);
         scope.walkDelete(scope.dstFolder);
+        scope.walkCopy(scope.srcFolder);
         process.exit(0);
     }
     compareFiles(src, dst) {
@@ -19,7 +20,7 @@ class Main {
         if (!fs.existsSync(dst))
             return true;
         var statDst = fs.statSync(dst);
-        return (statSrc.size !== statDst.size) && (new Date().getTime() - statSrc.mtime.getTime() > TIME_ACTIVITY * 60 * 1000);
+        return ((statSrc.size !== statDst.size) || (statDst.mtime.getTime() < statSrc.mtime.getTime())) && (new Date().getTime() - statSrc.mtime.getTime() > TIME_ACTIVITY * 60 * 1000);
     }
     walkCopy(dir) {
         var results = [];
@@ -51,15 +52,19 @@ class Main {
                     let fileName = file.substr(file.lastIndexOf('/') + 1);
                     let destObject = this.bigFilesMap.get(fileName);
                     if (destObject && destObject.size === stat.size) {
-                        console.log('move file', file);
+                        console.log('move file', destObject.file, dstFile);
                         try {
-                            fs.unlinkSync(dstFile);
+                            if (!fs.existsSync(dstFile)) {
+                                fs.unlinkSync(dstFile);
+                            }
                         }
-                        catch (e) { }
+                        catch (e) {
+                            console.error(e);
+                        }
                         fs.renameSync(destObject.file, dstFile);
                     }
                     else {
-                        console.log('copy file', file);
+                        console.log('copy file', file, dstFile);
                         this.copyFileSync(file, dstFile);
                     }
                 }

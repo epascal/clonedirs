@@ -19,7 +19,7 @@ class Main {
         if (!fs.existsSync(dst))
             return true;
         var statDst = fs.statSync(dst);
-        return (statSrc.size !== statDst.size) && (new Date().getTime() - statSrc.mtime.getTime() > TIME_ACTIVITY * 60 * 1000);
+        return ((statSrc.size !== statDst.size) || (statDst.mtime.getTime() < statSrc.mtime.getTime())) && (new Date().getTime() - statSrc.mtime.getTime() > TIME_ACTIVITY * 60 * 1000);
     }
     walkCopy(dir) {
         var results = [];
@@ -51,7 +51,7 @@ class Main {
                     let fileName = file.substr(file.lastIndexOf('/') + 1);
                     let destObject = this.bigFilesMap.get(fileName);
                     if (destObject && destObject.size === stat.size) {
-                        console.log('move file', file);
+                        console.log('move file', destObject.file, dstFile);
                         try {
                             fs.unlinkSync(dstFile);
                         }
@@ -59,7 +59,7 @@ class Main {
                         fs.renameSync(destObject.file, dstFile);
                     }
                     else {
-                        console.log('copy file', file);
+                        console.log('copy file', file, dstFile);
                         this.copyFileSync(file, dstFile);
                     }
                 }

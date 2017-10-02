@@ -16,8 +16,8 @@ class Main {
     scope.dstFolder = process.argv[3];
 
     scope.walkScanDest(scope.dstFolder);
-    scope.walkCopy(scope.srcFolder);
     scope.walkDelete(scope.dstFolder);
+    scope.walkCopy(scope.srcFolder);
     process.exit(0);
   }
 
@@ -25,7 +25,7 @@ class Main {
     var statSrc = fs.statSync(src);
     if (!fs.existsSync(dst)) return true;
     var statDst = fs.statSync(dst);
-    return (statSrc.size !== statDst.size) && (new Date().getTime() - statSrc.mtime.getTime() > TIME_ACTIVITY * 60 * 1000);
+    return ((statSrc.size !== statDst.size) || (statDst.mtime.getTime() < statSrc.mtime.getTime())) && (new Date().getTime() - statSrc.mtime.getTime() > TIME_ACTIVITY * 60 * 1000);
   }
 
   walkCopy(dir: string): string[] {
@@ -57,11 +57,11 @@ class Main {
           let fileName = file.substr(file.lastIndexOf('/') + 1);
           let destObject: any = this.bigFilesMap.get(fileName);
           if (destObject && destObject.size === stat.size) {
-            console.log('move file', file);
-            try { fs.unlinkSync(dstFile); } catch (e) { }
+            console.log('move file', destObject.file, dstFile);
+            try { if (!fs.existsSync(dstFile)) { fs.unlinkSync(dstFile); } } catch (e) { console.error(e); }
             fs.renameSync(destObject.file, dstFile);
           } else {
-            console.log('copy file', file);
+            console.log('copy file', file, dstFile);
             this.copyFileSync(file, dstFile);
           }
         }
