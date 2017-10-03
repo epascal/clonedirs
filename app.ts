@@ -14,6 +14,15 @@ class Main {
   start() {
     scope.srcFolder = process.argv[2];
     scope.dstFolder = process.argv[3];
+    var npid = require('npid');
+    
+    try {
+        var pid = npid.create('/var/run/clonedirs.pid');
+        pid.removeOnExit();
+    } catch (err) {
+        console.log(err);
+        process.exit(1);
+    }
 
     scope.walkScanDest(scope.dstFolder);
     scope.walkDelete(scope.dstFolder);
