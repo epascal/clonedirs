@@ -1,6 +1,6 @@
 {
     "name": "clonedirs",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Clone de répertoires",
     "main": "index.js",
     "author": "Eric PASCAL",
