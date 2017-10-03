@@ -1,13 +1,14 @@
 {
     "name": "clonedirs",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Clone de répertoires",
     "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
     "author": "Eric PASCAL",
     "license": "ISC",
+    "preferGlobal": true,
+    "directories": {
+        "bin": "./bin"
+    },
     "dependencies": {
         "npid": "^0.4.0"
     }
