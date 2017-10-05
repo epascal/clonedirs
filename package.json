@@ -1,13 +1,13 @@
 {
     "name": "clonedirs",
-    "version": "1.0.3",
+    "version": "1.0.12",
     "description": "Clone de répertoires",
     "main": "index.js",
     "author": "Eric PASCAL",
     "license": "ISC",
     "preferGlobal": true,
-    "directories": {
-        "bin": "./bin"
+    "bin": {
+        "clonedirs": "./bin/clonedirs"
     },
     "dependencies": {
         "npid": "^0.4.0"

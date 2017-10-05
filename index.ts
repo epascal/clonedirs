@@ -14,14 +14,22 @@ class Main {
   start() {
     scope.srcFolder = process.argv[2];
     scope.dstFolder = process.argv[3];
-    var npid = require('npid');
-    
+    let npid = require('npid');
+    let pidFileName = process.platform === 'win32' ? 'C:/Temp/clonedirs.pid' : '/var/run/clonedirs.pid';
+
     try {
-        var pid = npid.create('/var/run/clonedirs.pid');
-        pid.removeOnExit();
+      let pid = npid.create(pidFileName);
+      pid.removeOnExit();
     } catch (err) {
+      try {
+        process.kill(parseInt(fs.readFileSync(pidFileName, 'utf8')), 0);
         console.log(err);
         process.exit(1);
+      } catch (err) {
+        fs.unlinkSync(pidFileName);
+        let pid = npid.create(pidFileName);
+        pid.removeOnExit();
+      }
     }
 
     scope.walkScanDest(scope.dstFolder);
@@ -95,7 +103,7 @@ class Main {
     fs.closeSync(fdr);
     fs.closeSync(fdw);
   }
-  /* remove file no longer present in source folder */
+  /* remove file no longer present in destination folder */
   walkDelete(dir: string): string[] {
     let results: string[] = [];
     let list = fs.readdirSync(dir);
