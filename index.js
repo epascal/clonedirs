@@ -118,7 +118,13 @@ class Main {
             }
             else {
                 let srcFile = file.replace(scope.dstFolder, scope.srcFolder);
-                if (!fs.existsSync(srcFile)) {
+                let fileName = file.substr(file.lastIndexOf('/') + 1);
+                let destObject = this.bigFilesMap.get(fileName);
+                // do not delete if file will be moved
+                if (destObject && destObject.size === stat.size && destObject.file != file) {
+                    removedAll = false;
+                }
+                else if (!fs.existsSync(srcFile)) {
                     fs.unlinkSync(file);
                 }
                 else {
