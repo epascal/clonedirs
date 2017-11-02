@@ -5,7 +5,8 @@ var scope;
 const TIME_ACTIVITY = 1;
 class Main {
     constructor() {
-        this.bigFilesMap = new Map();
+        this.bigFilesMapSrc = new Map();
+        this.bigFilesMapDest = new Map();
         this.directoriesToDelete = new Array();
     }
     start() {
@@ -29,6 +30,7 @@ class Main {
                 pid.removeOnExit();
             }
         }
+        scope.walkScanSrc(scope.srcFolder);
         scope.walkScanDest(scope.dstFolder);
         scope.walkDelete(scope.dstFolder);
         scope.walkCopy(scope.srcFolder);
@@ -79,7 +81,7 @@ class Main {
                 let dstFile = file.replace(scope.srcFolder, scope.dstFolder);
                 if (!oneFileHasChanged && scope.compareFiles(file, dstFile)) {
                     let fileName = file.substr(file.lastIndexOf('/') + 1);
-                    let destObject = this.bigFilesMap.get(fileName);
+                    let destObject = this.bigFilesMapDest.get(fileName);
                     if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
                         console.log('move file', destObject.file, dstFile);
                         try {
@@ -131,9 +133,9 @@ class Main {
             else {
                 let srcFile = file.replace(scope.dstFolder, scope.srcFolder);
                 let fileName = file.substr(file.lastIndexOf('/') + 1);
-                let destObject = this.bigFilesMap.get(fileName);
+                let srcObject = this.bigFilesMapSrc.get(fileName);
                 // do not delete if file will be moved
-                if (destObject && destObject.size === stat.size && destObject.file != file) {
+                if (srcObject && srcObject.size === stat.size && srcObject.file.replace(scope.srcFolder, scope.dstFolder) != file) {
                     removedAll = false;
                 }
                 else if (!fs.existsSync(srcFile)) {
@@ -162,7 +164,26 @@ class Main {
             else {
                 let fileName = file.substr(file.lastIndexOf('/') + 1);
                 if (stat.size > 10000000 && fileName.length > 10) {
-                    this.bigFilesMap.set(fileName, { 'file': file, 'size': stat.size });
+                    this.bigFilesMapDest.set(fileName, { 'file': file, 'size': stat.size });
+                }
+            }
+        }
+        return results;
+    }
+    /* scan to find the big files that could be moved in destination instead of copied */
+    walkScanSrc(dir) {
+        var results = [];
+        var list = fs.readdirSync(dir);
+        for (let file of list) {
+            file = dir + '/' + file;
+            let stat = fs.statSync(file);
+            if (stat && stat.isDirectory()) {
+                scope.walkScanSrc(file);
+            }
+            else {
+                let fileName = file.substr(file.lastIndexOf('/') + 1);
+                if (stat.size > 10000000 && fileName.length > 10) {
+                    this.bigFilesMapSrc.set(fileName, { 'file': file, 'size': stat.size });
                 }
             }
         }
