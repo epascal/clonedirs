@@ -73,7 +73,7 @@ class Main {
         if (!oneFileHasChanged && scope.compareFiles(file, dstFile)) {
           let fileName = file.substr(file.lastIndexOf('/') + 1);
           let destObject: any = this.bigFilesMap.get(fileName);
-          if (destObject && destObject.size === stat.size) {
+          if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
             console.log('move file', destObject.file, dstFile);
             try { if (!fs.existsSync(dstFile)) { fs.unlinkSync(dstFile); } } catch (e) { console.error(e); }
             fs.renameSync(destObject.file, dstFile);
@@ -115,7 +115,12 @@ class Main {
         scope.walkDelete(file);
       } else {
         let srcFile: string = file.replace(scope.dstFolder, scope.srcFolder);
-        if (!fs.existsSync(srcFile)) {
+        let fileName = file.substr(file.lastIndexOf('/') + 1);
+        let destObject: any = this.bigFilesMap.get(fileName);
+        // do not delete if file will be moved
+        if (destObject && destObject.size === stat.size && destObject.file != file) {
+          removedAll = false;
+        } else if (!fs.existsSync(srcFile)) {
           fs.unlinkSync(file);
         } else {
           removedAll = false;

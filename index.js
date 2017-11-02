@@ -69,7 +69,7 @@ class Main {
                 if (!oneFileHasChanged && scope.compareFiles(file, dstFile)) {
                     let fileName = file.substr(file.lastIndexOf('/') + 1);
                     let destObject = this.bigFilesMap.get(fileName);
-                    if (destObject && destObject.size === stat.size) {
+                    if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
                         console.log('move file', destObject.file, dstFile);
                         try {
                             if (!fs.existsSync(dstFile)) {
