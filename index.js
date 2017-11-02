@@ -6,6 +6,7 @@ const TIME_ACTIVITY = 1;
 class Main {
     constructor() {
         this.bigFilesMap = new Map();
+        this.directoriesToDelete = new Array();
     }
     start() {
         scope.srcFolder = process.argv[2];
@@ -31,6 +32,16 @@ class Main {
         scope.walkScanDest(scope.dstFolder);
         scope.walkDelete(scope.dstFolder);
         scope.walkCopy(scope.srcFolder);
+        // check candidate directories for deletion and remove them is not present in source
+        scope.directoriesToDelete.forEach(dir => {
+            if (!fs.existsSync(dir.replace(scope.dstFolder, scope.srcFolder))) {
+                try {
+                    fs.rmdirSync(dir);
+                }
+                catch (e) {
+                }
+            }
+        });
         process.exit(0);
     }
     compareFiles(src, dst) {
@@ -115,6 +126,7 @@ class Main {
             let stat = fs.statSync(file);
             if (stat && stat.isDirectory()) {
                 scope.walkDelete(file);
+                removedAll = false;
             }
             else {
                 let srcFile = file.replace(scope.dstFolder, scope.srcFolder);
@@ -133,11 +145,7 @@ class Main {
             }
         }
         if (removedAll) {
-            try {
-                fs.rmdirSync(dir);
-            }
-            catch (e) {
-            }
+            this.directoriesToDelete.push(dir);
         }
         return results;
     }

@@ -7,6 +7,7 @@ class Main {
   srcFolder: string;
   dstFolder: string;
   bigFilesMap: Map<string, Object> = new Map<string, Object>();
+  directoriesToDelete: Array<string> = new Array<string>();
 
   constructor() {
   }
@@ -35,6 +36,17 @@ class Main {
     scope.walkScanDest(scope.dstFolder);
     scope.walkDelete(scope.dstFolder);
     scope.walkCopy(scope.srcFolder);
+    // check candidate directories for deletion and remove them is not present in source
+    scope.directoriesToDelete.forEach(dir => {
+      if (!fs.existsSync(dir.replace(scope.dstFolder, scope.srcFolder))) {
+          try {
+            fs.rmdirSync(dir);
+          } catch (e) {
+    
+          }
+        }
+    });
+
     process.exit(0);
   }
 
@@ -113,6 +125,7 @@ class Main {
       let stat = fs.statSync(file);
       if (stat && stat.isDirectory()) {
         scope.walkDelete(file);
+        removedAll = false;
       } else {
         let srcFile: string = file.replace(scope.dstFolder, scope.srcFolder);
         let fileName = file.substr(file.lastIndexOf('/') + 1);
@@ -128,11 +141,7 @@ class Main {
       }
     }
     if (removedAll) {
-      try {
-        fs.rmdirSync(dir);
-      } catch (e) {
-
-      }
+      this.directoriesToDelete.push(dir);
     }
     return results;
   }
