@@ -83,7 +83,7 @@ class Main {
                     if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
                         console.log('move file', destObject.file, dstFile);
                         try {
-                            if (!fs.existsSync(dstFile)) {
+                            if (fs.existsSync(dstFile)) {
                                 fs.unlinkSync(dstFile);
                             }
                         }

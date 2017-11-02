@@ -87,7 +87,7 @@ class Main {
           let destObject: any = this.bigFilesMap.get(fileName);
           if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
             console.log('move file', destObject.file, dstFile);
-            try { if (!fs.existsSync(dstFile)) { fs.unlinkSync(dstFile); } } catch (e) { console.error(e); }
+            try { if (fs.existsSync(dstFile)) { fs.unlinkSync(dstFile); } } catch (e) { console.error(e); }
             fs.renameSync(destObject.file, dstFile);
           } else {
             console.log('copy file', file, dstFile);
