@@ -14,6 +14,10 @@ class Main {
   }
 
   start() {
+    if (process.argv.length < 4) {
+      console.error("Usage: \nclonedirs source_folder target_folder");
+      process.exit(1);
+    }
     scope.srcFolder = process.argv[2];
     scope.dstFolder = process.argv[3];
     let npid = require('npid');
@@ -25,7 +29,7 @@ class Main {
     } catch (err) {
       try {
         process.kill(parseInt(fs.readFileSync(pidFileName, 'utf8')), 0);
-        console.log(err);
+        console.error(err);
         process.exit(1);
       } catch (err) {
         fs.unlinkSync(pidFileName);
@@ -41,12 +45,12 @@ class Main {
     // check candidate directories for deletion and remove them is not present in source
     scope.directoriesToDelete.forEach(dir => {
       if (!fs.existsSync(dir.replace(scope.dstFolder, scope.srcFolder))) {
-          try {
-            fs.rmdirSync(dir);
-          } catch (e) {
-    
-          }
+        try {
+          fs.rmdirSync(dir);
+        } catch (e) {
+
         }
+      }
     });
 
     process.exit(0);
@@ -84,14 +88,14 @@ class Main {
         scope.walkCopy(file);
       } else {
         let dstFile: string = file.replace(scope.srcFolder, scope.dstFolder);
-        if (!oneFileHasChanged && scope.compareFiles(file, dstFile)) {
-          let fileName = file.substr(file.lastIndexOf('/') + 1);
-          let destObject: any = this.bigFilesMapDest.get(fileName);
-          if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
-            console.log('move file', destObject.file, dstFile);
-            try { if (fs.existsSync(dstFile)) { fs.unlinkSync(dstFile); } } catch (e) { console.error(e); }
-            fs.renameSync(destObject.file, dstFile);
-          } else {
+        let fileName = file.substr(file.lastIndexOf('/') + 1);
+        let destObject: any = this.bigFilesMapDest.get(fileName);
+        if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
+          console.log('move file', destObject.file, dstFile);
+          try { if (fs.existsSync(dstFile)) { fs.unlinkSync(dstFile); } } catch (e) { console.error(e); }
+          fs.renameSync(destObject.file, dstFile);
+        } else {
+          if (!oneFileHasChanged && scope.compareFiles(file, dstFile)) {
             console.log('copy file', file, dstFile);
             this.copyFileSync(file, dstFile);
           }
