@@ -84,7 +84,7 @@ class Main {
             else {
                 let dstFile = file.replace(scope.srcFolder, scope.dstFolder);
                 let fileName = file.substr(file.lastIndexOf('/') + 1);
-                let bigFilesList = Array(this.bigFilesMapDest.get(fileName));
+                let bigFilesList = this.bigFilesMapDest.get(fileName);
                 // if ambiguity two big files with same name, then do not try to move
                 let destObject = bigFilesList && bigFilesList.length == 1 ? bigFilesList[0] : null;
                 if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
@@ -139,7 +139,7 @@ class Main {
             else {
                 let srcFile = file.replace(scope.dstFolder, scope.srcFolder);
                 let fileName = file.substr(file.lastIndexOf('/') + 1);
-                let bigfileList = Array(this.bigFilesMapSrc.get(fileName));
+                let bigfileList = this.bigFilesMapSrc.get(fileName);
                 let srcObject = bigfileList && bigfileList.length == 1 ? bigfileList[0] : null;
                 // do not delete if file will be moved
                 if (srcObject && srcObject.size === stat.size && srcObject.file.replace(scope.srcFolder, scope.dstFolder) != file) {
@@ -172,7 +172,7 @@ class Main {
                 let fileName = file.substr(file.lastIndexOf('/') + 1);
                 if (stat.size > 10000000 && fileName.length > 10) {
                     if (this.bigFilesMapDest.get(fileName)) {
-                        Array(this.bigFilesMapDest.get(fileName)).push({ 'file': file, 'size': stat.size });
+                        this.bigFilesMapDest.get(fileName).push({ 'file': file, 'size': stat.size });
                     }
                     else {
                         this.bigFilesMapDest.set(fileName, [{ 'file': file, 'size': stat.size }]);
@@ -196,7 +196,7 @@ class Main {
                 let fileName = file.substr(file.lastIndexOf('/') + 1);
                 if (stat.size > 10000000 && fileName.length > 10) {
                     if (this.bigFilesMapSrc.get(fileName)) {
-                        Array(this.bigFilesMapSrc.get(fileName)).push({ 'file': file, 'size': stat.size });
+                        this.bigFilesMapSrc.get(fileName).push({ 'file': file, 'size': stat.size });
                     }
                     else {
                         this.bigFilesMapSrc.set(fileName, [{ 'file': file, 'size': stat.size }]);
