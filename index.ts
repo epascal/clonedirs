@@ -132,8 +132,11 @@ class Main {
       file = dir + '/' + file;
       let stat = fs.statSync(file);
       if (stat && stat.isDirectory()) {
+        let srcFile: string = file.replace(scope.dstFolder, scope.srcFolder);
         scope.walkDelete(file);
-        removedAll = false;
+        if (fs.existsSync(srcFile)) {
+          removedAll = false;
+        }
       } else {
         let srcFile: string = file.replace(scope.dstFolder, scope.srcFolder);
         let fileName = file.substr(file.lastIndexOf('/') + 1);
