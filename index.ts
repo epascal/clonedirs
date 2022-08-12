@@ -45,7 +45,7 @@ class Main {
     scope.walkScanSrc(scope.srcFolder);
     console.log('Scanning destination folder...');
     scope.walkScanDest(scope.dstFolder);
-    console.log('Deleting redundant files in destination...');
+    console.log('Deleting files in destination...');
     scope.walkDelete(scope.dstFolder);
     console.log('Copying small files to destination or moving displaced big files in destination...');
     scope.walkCopy(scope.srcFolder);
