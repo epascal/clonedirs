@@ -17,7 +17,7 @@ class Main {
         scope.srcFolder = process.argv[2];
         scope.dstFolder = process.argv[3];
         let npid = require('npid');
-        let pidFileName = process.platform === 'win32' ? 'C:/Temp/clonedirs.pid' : '/var/run/clonedirs.pid';
+        let pidFileName = process.platform === 'win32' ? 'C:/Temp/clonedirs.pid' : '/tmp/clonedirs.pid';
         try {
             let pid = npid.create(pidFileName);
             pid.removeOnExit();
@@ -29,14 +29,22 @@ class Main {
                 process.exit(1);
             }
             catch (err) {
-                fs.unlinkSync(pidFileName);
+                try {
+                    fs.unlinkSync(pidFileName);
+                }
+                catch (err2) {
+                }
                 let pid = npid.create(pidFileName);
                 pid.removeOnExit();
             }
         }
+        console.log('Scanning source folder...');
         scope.walkScanSrc(scope.srcFolder);
+        console.log('Scanning destination folder...');
         scope.walkScanDest(scope.dstFolder);
+        console.log('Deleting redundant files in destination...');
         scope.walkDelete(scope.dstFolder);
+        console.log('Copying small files to destination or moving displaced big files in destination...');
         scope.walkCopy(scope.srcFolder);
         // check candidate directories for deletion and remove them is not present in source
         scope.directoriesToDelete.forEach(dir => {

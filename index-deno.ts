@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-
 var scope: Main;
 const TIME_ACTIVITY: number = 1;
 
@@ -21,7 +19,7 @@ class Main {
     scope.srcFolder = process.argv[2];
     scope.dstFolder = process.argv[3];
     let npid = require('npid');
-    let pidFileName = process.platform === 'win32' ? 'C:/Temp/clonedirs.pid' : '/tmp/clonedirs.pid';
+    let pidFileName = process.platform === 'win32' ? 'C:/Temp/clonedirs.pid' : '/var/run/clonedirs.pid';
 
     try {
       let pid = npid.create(pidFileName);
@@ -32,22 +30,15 @@ class Main {
         console.error(err);
         process.exit(1);
       } catch (err) {
-        try {
-          fs.unlinkSync(pidFileName);
-        } catch (err2) {
-        }
+        fs.unlinkSync(pidFileName);
         let pid = npid.create(pidFileName);
         pid.removeOnExit();
       }
     }
 
-    console.log('Scanning source folder...');
     scope.walkScanSrc(scope.srcFolder);
-    console.log('Scanning destination folder...');
     scope.walkScanDest(scope.dstFolder);
-    console.log('Deleting redundant files in destination...');
     scope.walkDelete(scope.dstFolder);
-    console.log('Copying small files to destination or moving displaced big files in destination...');
     scope.walkCopy(scope.srcFolder);
     // check candidate directories for deletion and remove them is not present in source
     scope.directoriesToDelete.forEach(dir => {
@@ -98,7 +89,7 @@ class Main {
         let fileName = file.substr(file.lastIndexOf('/') + 1);
         let bigFilesList: Array<any> = this.bigFilesMapDest.get(fileName) as Array<any>;
         // if ambiguity two big files with same name, then do not try to move
-        let destObject: any = bigFilesList && bigFilesList.length == 1 ? bigFilesList[0] : null;
+        let destObject: any = bigFilesList && bigFilesList.length==1?bigFilesList[0]:null;
         if (destObject && destObject.size === stat.size && destObject.file != dstFile) {
           console.log('move file', destObject.file, dstFile);
           try { if (fs.existsSync(dstFile)) { fs.unlinkSync(dstFile); } } catch (e) { console.error(e); }
@@ -148,7 +139,7 @@ class Main {
         let srcFile: string = file.replace(scope.dstFolder, scope.srcFolder);
         let fileName = file.substr(file.lastIndexOf('/') + 1);
         let bigfileList: Array<any> = this.bigFilesMapSrc.get(fileName) as Array<any>;
-        let srcObject: any = bigfileList && bigfileList.length == 1 ? bigfileList[0] : null;
+        let srcObject: any = bigfileList && bigfileList.length==1?bigfileList[0]:null;
         // do not delete if file will be moved
         if (srcObject && srcObject.size === stat.size && srcObject.file.replace(scope.srcFolder, scope.dstFolder) != file) {
           removedAll = false;
@@ -178,7 +169,7 @@ class Main {
         let fileName = file.substr(file.lastIndexOf('/') + 1);
         if (stat.size > 10000000 && fileName.length > 10) {
           if (this.bigFilesMapDest.get(fileName)) {
-            (this.bigFilesMapDest.get(fileName) as Array<any>).push({ 'file': file, 'size': stat.size });
+            (this.bigFilesMapDest.get(fileName) as Array<any>).push({'file': file, 'size': stat.size});
           } else {
             this.bigFilesMapDest.set(fileName, [{ 'file': file, 'size': stat.size }]);
           }
@@ -200,7 +191,7 @@ class Main {
         let fileName = file.substr(file.lastIndexOf('/') + 1);
         if (stat.size > 10000000 && fileName.length > 10) {
           if (this.bigFilesMapSrc.get(fileName)) {
-            (this.bigFilesMapSrc.get(fileName) as Array<any>).push({ 'file': file, 'size': stat.size });
+            (this.bigFilesMapSrc.get(fileName) as Array<any>).push({'file': file, 'size': stat.size});
           } else {
             this.bigFilesMapSrc.set(fileName, [{ 'file': file, 'size': stat.size }]);
           }
