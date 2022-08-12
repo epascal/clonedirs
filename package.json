@@ -1,7 +1,7 @@
 {
     "name": "clonedirs",
-    "version": "1.0.31",
-    "description": "Clone de répertoires",
+    "version": "1.0.32",
+    "description": "Directory cloning",
     "main": "index.js",
     "author": "Eric PASCAL",
     "license": "ISC",
